@@ -3,13 +3,12 @@ package main
 import (
 	"log"
 	"main-service/configs"
+	"main-service/db"
 	"main-service/internal/app"
 	"main-service/internal/app/handler"
 	"main-service/internal/domain"
 	"main-service/internal/repository"
 	"main-service/internal/usecase"
-	"user-service/internal/domain"
-
 	"github.com/gin-gonic/gin"
 )
 
