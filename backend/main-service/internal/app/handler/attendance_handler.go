@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"main-service/internal/usecase"
 	"main-service/pkg/util"
@@ -11,6 +12,10 @@ import (
 
 type AttendanceHandler struct {
 	attendanceUsecase usecase.AttendanceUsecase
+}
+type AttendanceWithUser struct {
+	Attendance interface{} `json:"attendance"`
+	User       interface{} `json:"user"`
 }
 
 func NewAttendanceHandler(uc usecase.AttendanceUsecase) *AttendanceHandler {
@@ -69,6 +74,37 @@ func (h *AttendanceHandler) GetAllAttendances(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, response)
 		return
 	}
-	response := util.APIResponse("Attendances found", http.StatusOK, attendances)
+
+	var results []AttendanceWithUser
+	for _, attendance := range attendances {
+		// Pastikan attendance punya field UserID
+		userID := attendance.UserID // sesuaikan dengan struct attendance kamu
+
+		userServiceURL := fmt.Sprintf("http://user-service:8080/api/v1/users/%d", userID)
+		resp, err := http.Get(userServiceURL)
+		if err != nil || resp.StatusCode != http.StatusOK {
+			// Bisa skip user, atau masukkan nil, atau return error, sesuai kebutuhan
+			results = append(results, AttendanceWithUser{
+				Attendance: attendance,
+				User:       nil,
+			})
+			if resp != nil {
+				resp.Body.Close()
+			}
+			continue
+		}
+		var user interface{}
+		if err := json.NewDecoder(resp.Body).Decode(&user); err != nil {
+			user = nil
+		}
+		resp.Body.Close()
+
+		results = append(results, AttendanceWithUser{
+			Attendance: attendance,
+			User:       user,
+		})
+	}
+
+	response := util.APIResponse("Attendances with users found", http.StatusOK, results)
 	c.JSON(http.StatusOK, response)
 }
