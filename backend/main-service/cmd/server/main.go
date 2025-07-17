@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"main-service/configs"
+	"main-service/db" // tambahkan import db
 	"main-service/internal/app"
 	"main-service/internal/app/handler"
 	"main-service/internal/domain"
@@ -26,6 +27,8 @@ func main() {
 		log.Fatalf("Failed to Migrate Database %v", err)
 	}
 	log.Println("Database Migration Successful")
+
+	db.SeedData(database) // panggil seeder locker & attendance
 
 	attendanceRepo := repository.NewAttendanceRepository(database)
 	attendanceUsecase := usecase.NewAttendanceUsecase(attendanceRepo)

@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS attendances (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    time_in TIMESTAMP,
+    time_out TIMESTAMP,
+    locker_id INTEGER,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_locker FOREIGN KEY(locker_id) REFERENCES lockers(id)
+);

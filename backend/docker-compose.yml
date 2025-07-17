@@ -13,7 +13,7 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./db-init:/docker-entrypoint-initdb.d
+      - ./db-init/init.sh:/docker-entrypoint-initdb.d/init.sh
 
   # --- SERVICE PERTAMA: USER SERVICE ---
   user-service: # Ganti nama 'app' menjadi lebih spesifik
@@ -32,26 +32,6 @@ services:
       DB_PORT: 5432
     depends_on:
       - db
-
-  # --- SERVICE KEDUA: PRODUCT SERVICE (BARU) ---
-  # product-service:
-  #   container_name: product_service_app
-  #   build:
-  #     context: ./product-service # Arahkan ke folder service yang baru
-  #     dockerfile: Dockerfile
-  #   restart: always
-  #   ports:
-  #     - "8082:8080" # PENTING: Gunakan port host yang berbeda lagi (misal: 8082)
-  #   environment:
-  #     # Variabel env untuk product-service
-  #     DB_HOST: db
-  #     DB_USER: ${DB_USER}
-  #     DB_PASSWORD: ${DB_PASSWORD}
-  #     DB_NAME: ${DB_NAME} # Mungkin menggunakan DB yang sama atau berbeda
-  #     DB_PORT: ${DB_PORT}
-  #   depends_on:
-  #     - db
-
   main-service:
     container_name: main_service_app
     build:
