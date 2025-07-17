@@ -1,0 +1,24 @@
+package app
+
+import (
+	"main-service/internal/app/handler"
+	"github.com/gin-gonic/gin"
+)
+
+func SetupRouter(router *gin.Engine, attendanceHandler *handler.AttendanceHandler, lockerHandler *handler.LockerHandler) {
+	apiV1 := router.Group("/api/v1")
+	{
+		attendanceRoutes := apiV1.Group("/attendances")
+		{
+			attendanceRoutes.POST("", attendanceHandler.CreateAttendance)
+			attendanceRoutes.GET("/:id", attendanceHandler.GetAttendanceByID)
+			attendanceRoutes.GET("", attendanceHandler.GetAllAttendances)
+		}
+		lockerRoutes := apiV1.Group("/lockers")
+		{
+			lockerRoutes.POST("", lockerHandler.CreateLocker)
+			lockerRoutes.GET("/:id", lockerHandler.GetLockerByID)
+			lockerRoutes.GET("", lockerHandler.GetAllLockers)
+		}
+	}
+} 
