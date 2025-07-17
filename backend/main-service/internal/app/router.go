@@ -2,10 +2,13 @@ package app
 
 import (
 	"main-service/internal/app/handler"
+
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(router *gin.Engine, attendanceHandler *handler.AttendanceHandler, lockerHandler *handler.LockerHandler) {
+	// router.Use(middleware.AuthMiddleware())
+
 	apiV1 := router.Group("/api/v1")
 	{
 		attendanceRoutes := apiV1.Group("/attendances")
@@ -21,4 +24,4 @@ func SetupRouter(router *gin.Engine, attendanceHandler *handler.AttendanceHandle
 			lockerRoutes.GET("", lockerHandler.GetAllLockers)
 		}
 	}
-} 
+}

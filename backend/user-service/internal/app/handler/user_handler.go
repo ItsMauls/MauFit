@@ -23,6 +23,21 @@ type CreateUserInput struct {
 	Email string `json:"email" binding:"required,email"`
 }
 
+func (h *UserHandler) VerifyToken(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Missing token"})
+		return
+	}
+	// Validasi token, misal dengan JWT
+	user, err := h.userUsecase.VerifyToken(authHeader)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"message": "Invalid token"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}
+
 func (h *UserHandler) CreateUser(c *gin.Context) {
 	var input CreateUserInput
 	if err := c.ShouldBindJSON(&input); err != nil {

@@ -2,9 +2,11 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"user-service/internal/domain"
 
 	"os"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -23,6 +25,7 @@ type UserUsecase interface {
 	GetAllUsers() ([]*domain.User, error)
 	RegisterUser(name, email, password, photoProfileURL, address, phone, bio string) (*domain.User, error)
 	AdminLogin(email, password string) (string, error)
+	VerifyToken(tokenString string) (*domain.User, error)
 }
 
 type userUsecase struct {
@@ -116,4 +119,36 @@ func (uc *userUsecase) AdminLogin(email, password string) (string, error) {
 		return "", err
 	}
 	return signed, nil
+}
+
+func (uc *userUsecase) VerifyToken(tokenString string) (*domain.User, error) {
+	if strings.HasPrefix(tokenString, "Bearer ") {
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	}
+	secret := os.Getenv("JWT_SECRET")
+	if secret == "" {
+		secret = "secret"
+	}
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("unexpected signing method")
+		}
+		return []byte(secret), nil
+	})
+	if err != nil || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return nil, errors.New("invalid claims")
+	}
+	userID, ok := claims["user_id"].(float64)
+	if !ok {
+		return nil, errors.New("user_id not found in token")
+	}
+	user, err := uc.userRepo.FindByID(fmt.Sprintf("%d", int64(userID)))
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

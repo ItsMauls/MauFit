@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"main-service/internal/domain"
+	"time"
 )
 
 type AttendanceUsecase interface {
@@ -25,9 +26,13 @@ func NewAttendanceUsecase(repo AttendanceRepository) AttendanceUsecase {
 }
 
 func (uc *attendanceUsecase) CreateAttendance(userID uint, timeIn string) (*domain.Attendance, error) {
+	timeInParsed, err := time.Parse(time.RFC3339, timeIn)
+	if err != nil {
+		return nil, err
+	}
 	attendance := &domain.Attendance{
 		UserID: userID,
-		// TimeIn: parse timeIn string to time.Time if needed
+		TimeIn: timeInParsed,
 	}
 	return uc.repo.Create(attendance)
 }
