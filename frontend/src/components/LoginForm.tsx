@@ -2,6 +2,8 @@
 'use client'
 
 import React, { useState } from "react";
+import { loginApi } from "@/utils/api";
+import { setAccessToken } from "@/utils/auth";
 
 // Komponen Input yang reusable
 const Input = (props: React.InputHTMLAttributes<HTMLInputElement>) => (
@@ -23,25 +25,32 @@ const Button = (props: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
 
 
 export default function LoginForm() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
 
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (!username || !password) {
-            setMessage('Username dan password harus diisi.');
+        if (!email || !password) {
+            setMessage('email dan password harus diisi.');
             return;
         }
         setIsLoading(true);
         setMessage('Mencoba untuk login...');
-        setTimeout(() => {
-            console.log("Submitting with:", { username, password });
-            setMessage(`Login berhasil! Selamat datang, ${username}.`);
+
+        try {
+            const data = await loginApi(email, password);
+            
+            setAccessToken(data.data.token);
+            setMessage("Login berhasil!");
+            // TODO: redirect ke halaman dashboard, dsb
+        } catch (err: any) {
+            setMessage(err.message || "Login gagal.");
+        } finally {
             setIsLoading(false);
-        }, 2000);
+        }
     };
 
     return (
@@ -51,8 +60,8 @@ export default function LoginForm() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="space-y-4">
                     <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-300 mb-1.5">Username</label>
-                        <Input id="username" name="username" type="text" placeholder="Masukkan username Anda" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1.5">Email</label>
+                        <Input id="email" name="email" type="text" placeholder="Masukkan email Anda" value={email} onChange={(e) => setEmail(e.target.value)} required />
                     </div>
                     <div>
                         <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>

@@ -8,6 +8,7 @@ import (
 
 func SetupRouter(router *gin.Engine, userHandler *handler.UserHandler) {
 	apiV1 := router.Group("api/v1")
+
 	{
 		userRoutes := apiV1.Group("/users")
 		{
