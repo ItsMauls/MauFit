@@ -13,13 +13,13 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-      - ./db-init/init.sh:/docker-entrypoint-initdb.d/init.sh
+      - ./backend/db-init/init.sh:/docker-entrypoint-initdb.d/init.sh
 
   # --- SERVICE PERTAMA: USER SERVICE ---
   user-service: # Ganti nama 'app' menjadi lebih spesifik
     container_name: user_service_app
     build:
-      context: ./user-service # Arahkan ke folder service yang benar
+      context: ./backend/user-service # Arahkan ke folder service yang benar
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -35,7 +35,7 @@ services:
   main-service:
     container_name: main_service_app
     build:
-      context: ./main-service
+      context: ./backend/main-service
       dockerfile: Dockerfile
     restart: always
     ports:
@@ -48,8 +48,21 @@ services:
       DB_PORT: 5432
     depends_on:
       - db
-
-# ... (volumes, networks, dll)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend_app
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - user-service
+      - main-service
 
 volumes:
   db_data:

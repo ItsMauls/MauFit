@@ -1,4 +1,5 @@
 'use client'
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const BrandInfo = () => {
@@ -38,7 +39,9 @@ const BrandInfo = () => {
             
             <div className="mt-8 relative h-48 w-full overflow-hidden rounded-lg">
                 {illustrations.map((item, index) => (
-                    <img
+                    <Image
+                        width={100}
+                        height={100}
                         key={index}
                         src={item.src}
                         alt={item.alt}

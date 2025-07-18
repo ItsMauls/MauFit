@@ -5,9 +5,6 @@ interface BrandBackgroundProps {
 }
 
 const BrandBackground: React.FC<BrandBackgroundProps> = ({ children }) => {
-  // URL untuk GIF gym. Ganti dengan URL GIF Anda sendiri jika perlu.
-  const gymGifUrl = '';
-  
   return (
     <div className="relative w-full h-screen overflow-hidden font-sans bg-gradient-to-br from-green-900 via-green-900/70 to-black">
       {/* Konten utama (Form Login) diposisikan di tengah */}
