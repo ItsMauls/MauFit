@@ -18,6 +18,7 @@ func SetupRouter(router *gin.Engine, userHandler *handler.UserHandler) {
 			userRoutes.POST("/register", userHandler.Register)
 			userRoutes.POST("/login", userHandler.Login)
 			userRoutes.GET("/verify-token", userHandler.VerifyToken)
+			userRoutes.PATCH("/:id/profile", userHandler.UpdateUserProfile)
 		}
 	}
 }

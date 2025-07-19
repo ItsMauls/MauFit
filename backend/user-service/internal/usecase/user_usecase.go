@@ -17,15 +17,17 @@ type UserRepository interface {
 	Save(user *domain.User) (*domain.User, error)
 	FindByID(id string) (*domain.User, error)
 	FindAll() ([]*domain.User, error)
+	UpdateUserProfile(profile *domain.UserProfile) (*domain.UserProfile, error)
 }
 
 type UserUsecase interface {
-	CreateUser(name, email string) (*domain.User, error)
+	CreateUser(name, email string, fingerprintId string) (*domain.User, error)
 	GetUserByID(id string) (*domain.User, error)
 	GetAllUsers() ([]*domain.User, error)
 	RegisterUser(name, email, password, photoProfileURL, address, phone, bio string) (*domain.User, error)
 	AdminLogin(email, password string) (string, error)
 	VerifyToken(tokenString string) (*domain.User, error)
+	UpdateUserProfile(id, address, phone, bio, photoProfileURL string) (*domain.UserProfile, error)
 }
 
 type userUsecase struct {
@@ -38,10 +40,11 @@ func NewUserUsecase(repo UserRepository) UserUsecase {
 	}
 }
 
-func (uc *userUsecase) CreateUser(name, email string) (*domain.User, error) {
+func (uc *userUsecase) CreateUser(name, email string, fingerprintId string) (*domain.User, error) {
 	user := &domain.User{
-		Name:  name,
-		Email: email,
+		Name:          name,
+		Email:         email,
+		FingerprintID: fingerprintId,
 	}
 	return uc.userRepo.Save(user)
 }
@@ -151,4 +154,31 @@ func (uc *userUsecase) VerifyToken(tokenString string) (*domain.User, error) {
 		return nil, err
 	}
 	return user, nil
+}
+
+func (uc *userUsecase) UpdateUserProfile(id, address, phone, bio, photoProfileURL string) (*domain.UserProfile, error) {
+	user, err := uc.userRepo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	if user.UserProfile == nil {
+		user.UserProfile = &domain.UserProfile{UserID: user.ID}
+	}
+	if address != "" {
+		user.UserProfile.Address = address
+	}
+	if phone != "" {
+		user.UserProfile.Phone = phone
+	}
+	if bio != "" {
+		user.UserProfile.Bio = bio
+	}
+	if photoProfileURL != "" {
+		user.UserProfile.PhotoProfileURL = photoProfileURL
+	}
+	updated, err := uc.userRepo.UpdateUserProfile(user.UserProfile)
+	if err != nil {
+		return nil, err
+	}
+	return updated, nil
 }

@@ -1,12 +1,12 @@
 // components/GlassCard.tsx
 import React from "react";
 
-interface GlassCardProps {
+interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   className?: string;
 }
 
-const GlassCard: React.FC<GlassCardProps> = ({ children, className }) => {
+const GlassCard: React.FC<GlassCardProps> = ({ children, className, ...rest }) => {
   return (
     <div
       className={`
@@ -18,6 +18,7 @@ const GlassCard: React.FC<GlassCardProps> = ({ children, className }) => {
         transition-all duration-300
         ${className} 
       `}
+      {...rest}
     >
       {children}
     </div>

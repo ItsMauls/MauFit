@@ -19,8 +19,9 @@ func NewUserHandler(uc usecase.UserUsecase) *UserHandler {
 }
 
 type CreateUserInput struct {
-	Name  string `json:"name" binding:"required"`
-	Email string `json:"email" binding:"required,email"`
+	Name          string `json:"name" binding:"required"`
+	Email         string `json:"email" binding:"required,email"`
+	FingerprintID string `json:"fingerprint_id"`
 }
 
 func (h *UserHandler) VerifyToken(c *gin.Context) {
@@ -45,7 +46,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response)
 		return
 	}
-	user, err := h.userUsecase.CreateUser(input.Name, input.Email)
+	user, err := h.userUsecase.CreateUser(input.Name, input.Email, input.FingerprintID)
 	if err != nil {
 		response := util.APIResponse(err.Error(), http.StatusInternalServerError, nil)
 		c.JSON(http.StatusInternalServerError, response)
@@ -124,5 +125,30 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 	response := util.APIResponse("Login successful", http.StatusOK, gin.H{"token": token})
+	c.JSON(http.StatusOK, response)
+}
+
+type UpdateUserProfileInput struct {
+	Address         string `json:"address"`
+	Phone           string `json:"phone"`
+	Bio             string `json:"bio"`
+	PhotoProfileURL string `json:"photo_profile_url"`
+}
+
+func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
+	id := c.Param("id")
+	var input UpdateUserProfileInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response := util.APIResponse("Input not valid", http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+	profile, err := h.userUsecase.UpdateUserProfile(id, input.Address, input.Phone, input.Bio, input.PhotoProfileURL)
+	if err != nil {
+		response := util.APIResponse(err.Error(), http.StatusInternalServerError, nil)
+		c.JSON(http.StatusInternalServerError, response)
+		return
+	}
+	response := util.APIResponse("User profile updated", http.StatusOK, profile)
 	c.JSON(http.StatusOK, response)
 }

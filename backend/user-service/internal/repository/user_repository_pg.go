@@ -42,6 +42,32 @@ func (r *userRepository) FindAll() ([]*domain.User, error) {
 	return users, nil
 }
 
+func (r *userRepository) UpdateUserProfile(profile *domain.UserProfile) (*domain.UserProfile, error) {
+	var existing domain.UserProfile
+	err := r.db.Where("user_id = ?", profile.UserID).First(&existing).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			// Create new profile if not exists
+			err = r.db.Create(profile).Error
+			if err != nil {
+				return nil, err
+			}
+			return profile, nil
+		}
+		return nil, err
+	}
+	// Update fields
+	existing.Address = profile.Address
+	existing.Phone = profile.Phone
+	existing.Bio = profile.Bio
+	existing.PhotoProfileURL = profile.PhotoProfileURL
+	err = r.db.Save(&existing).Error
+	if err != nil {
+		return nil, err
+	}
+	return &existing, nil
+}
+
 func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{db: db}
 }

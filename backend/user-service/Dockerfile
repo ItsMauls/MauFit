@@ -1,4 +1,4 @@
-# --- STAGE 1: Build ---
+# Stage 1: Build the application
 FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
@@ -10,15 +10,19 @@ COPY . .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/server/main.go
 
-# --- STAGE 2: Final Image ---
-FROM alpine:latest
+# Stage 2: Install Air for hot-reloading
+FROM golang:1.24-alpine AS air_installer
+RUN go install github.com/air-verse/air@latest
+
+# Stage 3: Final image
+FROM golang:1.24-alpine
 
 WORKDIR /app
 
-# Hanya salin binary aplikasi yang sudah jadi
 COPY --from=builder /app/main .
+COPY --from=air_installer /go/bin/air /usr/local/bin/
+COPY . .
 
 EXPOSE 8080
 
-# Langsung jalankan aplikasi Go
-CMD ["/app/main"]
+CMD ["air", "-c", ".air.toml"]
