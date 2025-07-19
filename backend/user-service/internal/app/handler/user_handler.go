@@ -24,6 +24,7 @@ type CreateUserInput struct {
 	FingerprintID string `json:"fingerprint_id"`
 }
 
+
 func (h *UserHandler) VerifyToken(c *gin.Context) {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader == "" {
@@ -175,3 +176,14 @@ func (h *UserHandler) VerifyFingerprint(c *gin.Context) {
 	response := util.APIResponse("User verified", http.StatusOK, user)
 	c.JSON(http.StatusOK, response)
 }
+
+func (h *UserHandler) GetUserByFingerprintID(c *gin.Context) {
+    fingerprintID := c.Param("fingerprint_id")
+    user, err := h.userUsecase.GetUserByFingerprintID(fingerprintID)
+    if err != nil || user == nil {
+        c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+        return
+    }
+    c.JSON(http.StatusOK, gin.H{"user": user})
+}
+

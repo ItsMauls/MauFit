@@ -6,7 +6,8 @@ import (
 	"main-service/internal/usecase"
 	"main-service/pkg/util"
 	"net/http"
-
+	"time"
+	
 	"github.com/gin-gonic/gin"
 )
 
@@ -112,6 +113,60 @@ func (h *AttendanceHandler) GetAllAttendances(c *gin.Context) {
 type CreateAttendanceByFingerprintInput struct {
 	FingerprintTemplate string `json:"fingerprint_template" binding:"required"`
 }
+
+type ClockInInput struct {
+    FingerprintID string `json:"fingerprint_id" binding:"required"`
+}
+
+type ClockInByFingerprintInput struct {
+    FingerprintID string `json:"fingerprint_id" binding:"required"`
+}
+
+func (h *AttendanceHandler) ClockInByFingerprint(c *gin.Context) {
+    var input ClockInByFingerprintInput
+    if err := c.ShouldBindJSON(&input); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{"message": "Input tidak valid"})
+        return
+    }
+
+    // Panggil user-service untuk cari user by fingerprint_id
+    userServiceURL := fmt.Sprintf("http://user-service:8081/api/v1/users/by-fingerprint/%s", input.FingerprintID)
+    resp, err := http.Get(userServiceURL)
+    if err != nil || resp.StatusCode != http.StatusOK {
+        c.JSON(http.StatusNotFound, gin.H{"message": "User tidak ditemukan"})
+        return
+    }
+    defer resp.Body.Close()
+
+    // Decode user dari response user-service
+    var userResp struct {
+        User map[string]interface{} `json:"user"`
+    }
+    if err := json.NewDecoder(resp.Body).Decode(&userResp); err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal decode user"})
+        return
+    }
+    user := userResp.User
+    userID, ok := user["id"].(float64) // JSON number jadi float64
+    if !ok {
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "User ID tidak valid"})
+        return
+    }
+
+    // Buat record absensi
+    attendance, err := h.attendanceUsecase.CreateAttendance(uint(userID), time.Now().Format(time.RFC3339))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"message": "Gagal menyimpan absensi"})
+        return
+    }
+
+    c.JSON(http.StatusOK, gin.H{
+        "message": "Absensi berhasil",
+        "user": user,
+        "attendance": attendance,
+    })
+}
+
 
 func (h *AttendanceHandler) CreateAttendanceByFingerprint(c *gin.Context) {
 	var input CreateAttendanceByFingerprintInput

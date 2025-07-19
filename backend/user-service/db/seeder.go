@@ -26,31 +26,84 @@ func SeedUsers(db *gorm.DB) {
 	adminPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
 	memberPassword, _ := bcrypt.GenerateFromPassword([]byte("member123"), bcrypt.DefaultCost)
 
+	// Create users with fingerprint_ids that match the simulated users in fingerprint agent
 	users := []domain.User{
 		{
 			Name:          "Admin User",
-			Email:         "admin@example.com",
+			Email:         "admin@maufit.com",
 			Password:      string(adminPassword),
 			Role:          "admin",
-			FingerprintID: "admin-fp-001",
+			FingerprintID: "ADMIN001", // Special admin fingerprint
 			UserProfile: &domain.UserProfile{
 				PhotoProfileURL: "https://example.com/photos/admin.jpg",
-				Address:         "Admin Street 1, City",
+				Address:         "Admin Office, MauFit Gym",
 				Phone:           "+621234567890",
-				Bio:             "Super admin user.",
+				Bio:             "Administrator MauFit Gym",
 			},
 		},
 		{
-			Name:          "Test User 1",
-			Email:         "test1@example.com",
+			Name:          "John Doe",
+			Email:         "john.doe@email.com",
 			Password:      string(memberPassword),
 			Role:          "member",
-			FingerprintID: "member-fp-001",
+			FingerprintID: "FP001", // Matches fingerprint agent simulation
 			UserProfile: &domain.UserProfile{
-				PhotoProfileURL: "https://example.com/photos/member1.jpg",
-				Address:         "Member Street 2, City",
+				PhotoProfileURL: "https://example.com/photos/john.jpg",
+				Address:         "Jl. Sudirman No. 123, Jakarta",
 				Phone:           "+621234567891",
-				Bio:             "Regular member user.",
+				Bio:             "Fitness enthusiast, loves cardio workouts",
+			},
+		},
+		{
+			Name:          "Jane Smith",
+			Email:         "jane.smith@email.com",
+			Password:      string(memberPassword),
+			Role:          "member",
+			FingerprintID: "FP002", // Matches fingerprint agent simulation
+			UserProfile: &domain.UserProfile{
+				PhotoProfileURL: "https://example.com/photos/jane.jpg",
+				Address:         "Jl. Thamrin No. 456, Jakarta",
+				Phone:           "+621234567892",
+				Bio:             "Yoga instructor and wellness coach",
+			},
+		},
+		{
+			Name:          "Bob Johnson",
+			Email:         "bob.johnson@email.com",
+			Password:      string(memberPassword),
+			Role:          "member",
+			FingerprintID: "FP003", // Matches fingerprint agent simulation
+			UserProfile: &domain.UserProfile{
+				PhotoProfileURL: "https://example.com/photos/bob.jpg",
+				Address:         "Jl. Gatot Subroto No. 789, Jakarta",
+				Phone:           "+621234567893",
+				Bio:             "Weightlifting champion, personal trainer",
+			},
+		},
+		{
+			Name:          "Alice Brown",
+			Email:         "alice.brown@email.com",
+			Password:      string(memberPassword),
+			Role:          "member",
+			FingerprintID: "FP004", // Matches fingerprint agent simulation
+			UserProfile: &domain.UserProfile{
+				PhotoProfileURL: "https://example.com/photos/alice.jpg",
+				Address:         "Jl. Kuningan No. 321, Jakarta",
+				Phone:           "+621234567894",
+				Bio:             "Swimming coach and aqua fitness trainer",
+			},
+		},
+		{
+			Name:          "Charlie Wilson",
+			Email:         "charlie.wilson@email.com",
+			Password:      string(memberPassword),
+			Role:          "member",
+			FingerprintID: "FP005", // Matches fingerprint agent simulation
+			UserProfile: &domain.UserProfile{
+				PhotoProfileURL: "https://example.com/photos/charlie.jpg",
+				Address:         "Jl. Senayan No. 654, Jakarta",
+				Phone:           "+621234567895",
+				Bio:             "CrossFit athlete and nutrition specialist",
 			},
 		},
 	}

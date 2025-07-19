@@ -14,6 +14,7 @@ func SetupRouter(router *gin.Engine, userHandler *handler.UserHandler) {
 		{
 			userRoutes.POST("", userHandler.CreateUser)
 			userRoutes.GET("/:id", userHandler.GetUserByID)
+			userRoutes.GET("/by-fingerprint/:fingerprint_id", userHandler.GetUserByFingerprintID)
 			userRoutes.GET("", userHandler.GetAllUsers)
 			userRoutes.POST("/register", userHandler.Register)
 			userRoutes.POST("/login", userHandler.Login)

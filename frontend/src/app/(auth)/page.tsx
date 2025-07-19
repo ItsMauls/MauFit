@@ -5,6 +5,7 @@ import GlassCard from "@/components/GlassCard";
 import Modal from "@/components/Modal";
 import UserForm from "@/components/UserForm";
 import LockerGrid from "@/components/LockerGrid";
+import AbsensiForm from "@/components/AbsensiForm";
 
 const sidebarItems = [
   { label: "Tambah User", icon: "➕" },
@@ -100,7 +101,7 @@ export default function Home() {
               <UserForm />
             )}
             {activeTab === "absensi" && (
-              <div> <span className="text-lg font-bold">Absen (Coming Soon)</span> </div>
+              <AbsensiForm />
             )}
             {activeTab === "kelas" && (
               <div> <span className="text-lg font-bold">Kelola Kelas (Coming Soon)</span> </div>

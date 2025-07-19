@@ -6,7 +6,7 @@ export default function UserForm() {
   // Step 1: User
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [fingerprintTemplate, setFingerprintTemplate] = useState<string | null>(null);
+  const [fingerprintId, setFingerprintId] = useState<string | null>(null);
   const [scanStatus, setScanStatus] = useState<string>("Not Scanned");
   const [isScanning, setIsScanning] = useState(false);
   // Step 2: Profile
@@ -31,17 +31,21 @@ export default function UserForm() {
     const ws = new WebSocket('ws://localhost:8088');
 
     ws.onopen = () => {
-      setScanStatus("Connected. Please scan.");
-      ws.send(JSON.stringify({ command: 'start_scan' }));
+      setScanStatus("Connected. Please scan for enrollment.");
+      ws.send(JSON.stringify({ command: 'start_enrollment_scan' }));
     };
 
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
-      if (data.type === 'fingerprint_scanned') {
-        setFingerprintTemplate(data.template);
-        setScanStatus("Scan Successful!");
+      if (data.type === 'enrollment_scan_complete') {
+        // Generate unique fingerprint_id for new user
+        const uniqueFingerprintId = `FP${Date.now().toString().slice(-6)}`; // e.g., FP234567
+        setFingerprintId(uniqueFingerprintId);
+        setScanStatus(`Enrollment successful! ID: ${uniqueFingerprintId}`);
         setIsScanning(false);
         ws.close();
+      } else if (data.type === 'enrollment_progress') {
+        setScanStatus(`Enrollment: ${data.progress}/3 scans completed`);
       }
     };
 
@@ -51,8 +55,8 @@ export default function UserForm() {
     };
 
     ws.onclose = () => {
-      if (!fingerprintTemplate) {
-        setScanStatus("Scan cancelled or failed.");
+      if (!fingerprintId) {
+        setScanStatus("Enrollment cancelled or failed.");
       }
       setIsScanning(false);
     };
@@ -61,17 +65,17 @@ export default function UserForm() {
   // Step 1: Register user
   const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fingerprintTemplate) {
-      setError("Please scan fingerprint before registering.");
+    if (!fingerprintId) {
+      setError("Please complete fingerprint enrollment before registering.");
       return;
     }
     setLoading(true);
     setMessage(null);
     setError(null);
     try {
-      // Pass the fingerprint template to the API
-      const res = await createUserApi({ name, email, fingerprint_id: fingerprintTemplate });
-      setMessage("User berhasil didaftarkan! Lanjutkan melengkapi profil.");
+      // Register user with unique fingerprint_id
+      const res = await createUserApi({ name, email, fingerprint_id: fingerprintId });
+      setMessage(`User berhasil didaftarkan dengan Fingerprint ID: ${fingerprintId}! Lanjutkan melengkapi profil.`);
       setCreatedUserId(res.data.id || res.data.user?.id); // backend response
       setStep("profile");
     } catch (err: any) {
@@ -99,7 +103,7 @@ export default function UserForm() {
       
       setMessage("Profil user berhasil dilengkapi!");
       setStep("user");
-      setName(""); setEmail(""); setAddress(""); setPhone(""); setBio(""); setPhotoProfileUrl(""); setFingerprintTemplate(null); setScanStatus("Not Scanned");
+      setName(""); setEmail(""); setAddress(""); setPhone(""); setBio(""); setPhotoProfileUrl(""); setFingerprintId(null); setScanStatus("Not Scanned");
       setPhotoPreview(null);
       setCreatedUserId(null);
       if (fileInputRef.current) fileInputRef.current.value = "";

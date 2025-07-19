@@ -36,3 +36,4 @@ func (r *AttendanceRepository) FindAll() ([]*domain.Attendance, error) {
 	}
 	return attendances, nil
 }
+

@@ -19,6 +19,7 @@ type UserRepository interface {
 	FindAll() ([]*domain.User, error)
 	UpdateUserProfile(profile *domain.UserProfile) (*domain.UserProfile, error)
 	FindByFingerprintID(fingerprintID string) (*domain.User, error)
+	
 }
 
 type UserUsecase interface {
@@ -30,10 +31,15 @@ type UserUsecase interface {
 	VerifyToken(tokenString string) (*domain.User, error)
 	UpdateUserProfile(id, address, phone, bio, photoProfileURL string) (*domain.UserProfile, error)
 	VerifyFingerprint(fingerprintTemplate string) (*domain.User, error)
+	GetUserByFingerprintID(fingerprintID string) (*domain.User, error)
 }
 
 type userUsecase struct {
 	userRepo UserRepository
+}
+
+func (uc *userUsecase) GetUserByFingerprintID(fingerprintID string) (*domain.User, error) {
+    return uc.userRepo.FindByFingerprintID(fingerprintID)
 }
 
 func NewUserUsecase(repo UserRepository) UserUsecase {

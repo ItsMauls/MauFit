@@ -1,11 +1,11 @@
 package usecase
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
 	"main-service/internal/domain"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -56,23 +56,25 @@ func (uc *attendanceUsecase) GetAllAttendances() ([]*domain.Attendance, error) {
 }
 
 func (uc *attendanceUsecase) CreateAttendanceByFingerprint(fingerprintTemplate string) (*domain.Attendance, error) {
-	// 1. Panggil user-service untuk verifikasi sidik jari
-	userServiceURL := "http://user-service:8080/api/v1/users/verify-fingerprint"
-	reqBody, _ := json.Marshal(map[string]string{
-		"fingerprint_template": fingerprintTemplate,
-	})
+	// 1. Extract fingerprint_id from template using pattern matching
+	fingerprintID := uc.extractFingerprintIDFromTemplate(fingerprintTemplate)
+	if fingerprintID == "" {
+		return nil, fmt.Errorf("could not extract fingerprint_id from template")
+	}
 
-	resp, err := http.Post(userServiceURL, "application/json", bytes.NewBuffer(reqBody))
+	// 2. Panggil user-service untuk cari user by fingerprint_id
+	userServiceURL := fmt.Sprintf("http://user-service:8080/api/v1/users/by-fingerprint/%s", fingerprintID)
+	resp, err := http.Get(userServiceURL)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call user-service: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("user not found for the given fingerprint")
+		return nil, fmt.Errorf("user not found for fingerprint_id: %s", fingerprintID)
 	}
 
-	// 2. Decode response untuk mendapatkan UserID
+	// 3. Decode response untuk mendapatkan UserID
 	var serviceResponse struct {
 		Data User `json:"data"`
 	}
@@ -85,10 +87,28 @@ func (uc *attendanceUsecase) CreateAttendanceByFingerprint(fingerprintTemplate s
 		return nil, fmt.Errorf("invalid user ID from user-service")
 	}
 
-	// 3. Buat data absensi
+	// 4. Buat data absensi
 	attendance := &domain.Attendance{
 		UserID: userID,
 		TimeIn: time.Now(),
 	}
 	return uc.repo.Create(attendance)
+}
+
+// extractFingerprintIDFromTemplate extracts fingerprint_id from realistic template
+func (uc *attendanceUsecase) extractFingerprintIDFromTemplate(template string) string {
+	// Extract fingerprint_id from new template format: TEMPLATE_{fingerprint_id}_Q{quality}_{timestamp}
+	// Example: TEMPLATE_FP001_Q85_1642678901234
+	if strings.HasPrefix(template, "TEMPLATE_") {
+		// Remove "TEMPLATE_" prefix
+		template = strings.TrimPrefix(template, "TEMPLATE_")
+
+		// Split by underscore and get the first part (fingerprint_id)
+		parts := strings.Split(template, "_")
+		if len(parts) >= 1 {
+			return parts[0] // This should be the fingerprint_id (e.g., "FP001")
+		}
+	}
+
+	return ""
 }
