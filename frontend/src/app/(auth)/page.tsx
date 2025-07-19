@@ -7,16 +7,21 @@ import UserForm from "@/components/UserForm";
 import LockerGrid from "@/components/LockerGrid";
 
 const sidebarItems = [
-  { label: "Dashboard", icon: "🏠" },
-  { label: "User", icon: "👤" },
-  { label: "Absensi", icon: "📝" },
-  { label: "Locker", icon: "🔒" },
+  { label: "Tambah User", icon: "➕" },
+  { label: "Absen", icon: "🕒" },
+  { label: "Kelola User", icon: "👤" },
+  { label: "Kelola Kelas", icon: "🏋️" },
+  { label: "Broadcast", icon: "📢" },
+  { label: "Kelola Locker", icon: "🔒" },
 ];
 
 const modalTabs = [
-  { key: "user", label: "Kelola User" },
-  { key: "absensi", label: "Kelola Absensi" },
-  { key: "locker", label: "Kelola Locker" },
+  { key: "tambah-user", label: "Tambah User" },
+  { key: "absensi", label: "Absen" },
+  { key: "kelola-user", label: "Kelola User" },
+  { key: "kelas", label: "Kelola Kelas" },
+  { key: "broadcast", label: "Broadcast" },
+  { key: "kelola-locker", label: "Kelola Locker" },
 ];
 
 export default function Home() {
@@ -43,20 +48,35 @@ export default function Home() {
       {/* Main Content */}
       <section className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("user"); }}>
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("tambah-user"); }}>
+            <div className="text-4xl mb-2">➕</div>
+            <div className="text-xl font-semibold text-white mb-1">Tambah User</div>
+            <div className="text-gray-300 text-sm">Tambah member baru</div>
+          </GlassCard>
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("absensi"); }}>
+            <div className="text-4xl mb-2">🕒</div>
+            <div className="text-xl font-semibold text-white mb-1">Absen</div>
+            <div className="text-gray-300 text-sm">Kelola absensi member</div>
+          </GlassCard>
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("kelola-user"); }}>
             <div className="text-4xl mb-2">👤</div>
             <div className="text-xl font-semibold text-white mb-1">Kelola User</div>
-            <div className="text-gray-300 text-sm">Tambah, edit, dan hapus user</div>
+            <div className="text-gray-300 text-sm">Edit & hapus user</div>
           </GlassCard>
-          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105">
-            <div className="text-4xl mb-2">📝</div>
-            <div className="text-xl font-semibold text-white mb-1">Kelola Absensi</div>
-            <div className="text-gray-300 text-sm">Lihat dan kelola data absensi</div>
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("kelas"); }}>
+            <div className="text-4xl mb-2">🏋️</div>
+            <div className="text-xl font-semibold text-white mb-1">Kelola Kelas</div>
+            <div className="text-gray-300 text-sm">Atur jadwal kelas</div>
           </GlassCard>
-          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105">
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("broadcast"); }}>
+            <div className="text-4xl mb-2">📢</div>
+            <div className="text-xl font-semibold text-white mb-1">Broadcast</div>
+            <div className="text-gray-300 text-sm">Kirim pengumuman</div>
+          </GlassCard>
+          <GlassCard className="flex flex-col items-center justify-center min-h-[180px] cursor-pointer hover:scale-105" onClick={() => { setModalOpen(true); setActiveTab("kelola-locker"); }}>
             <div className="text-4xl mb-2">🔒</div>
             <div className="text-xl font-semibold text-white mb-1">Kelola Locker</div>
-            <div className="text-gray-300 text-sm">Atur dan monitor locker</div>
+            <div className="text-gray-300 text-sm">Atur & monitor locker</div>
           </GlassCard>
         </div>
       </section>
@@ -76,13 +96,19 @@ export default function Home() {
           </div>
           {/* Tab Content */}
           <div className="flex-1">
-            {activeTab === "user" && (
+            {(activeTab === "tambah-user" || activeTab === "kelola-user") && (
               <UserForm />
             )}
             {activeTab === "absensi" && (
-              <div> <span className="text-lg font-bold">Kelola Absensi (Coming Soon)</span> </div>
+              <div> <span className="text-lg font-bold">Absen (Coming Soon)</span> </div>
             )}
-            {activeTab === "locker" && (
+            {activeTab === "kelas" && (
+              <div> <span className="text-lg font-bold">Kelola Kelas (Coming Soon)</span> </div>
+            )}
+            {activeTab === "broadcast" && (
+              <div> <span className="text-lg font-bold">Broadcast (Coming Soon)</span> </div>
+            )}
+            {activeTab === "kelola-locker" && (
               <LockerGrid />
             )}
           </div>
