@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>MauFit Fingerprint Agent</title>
+    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
+</head>
+<body>
+    <h1>MauFit Fingerprint Agent</h1>
+    <p>Status: <strong id="status">Initializing...</strong></p>
+    <p id="message"></p>
+
+    <script>
+      window.electronAPI.onUpdateStatus((_event, value) => {
+        const statusEl = document.getElementById('status');
+        statusEl.innerText = value.text;
+        statusEl.style.color = value.color;
+      });
+    </script>
+</body>
+</html>

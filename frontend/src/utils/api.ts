@@ -24,6 +24,7 @@ export interface LoginResponse {
 export interface CreateUserInput {
   name: string;
   email: string;
+  fingerprint_id: string;
 }
 
 export interface CreateUserProfileInput {
@@ -35,11 +36,10 @@ export interface CreateUserProfileInput {
 
 export async function createUserApi(input: CreateUserInput): Promise<any> {
   // Generate random fingerprint_id (6 digit number as string)
-  const fingerprint_id = Math.floor(100000 + Math.random() * 900000).toString();
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: input.name, email: input.email, fingerprint_id }),
+    body: JSON.stringify(input),
   });
   if (!res.ok) {
     const err = await res.json();
@@ -71,6 +71,15 @@ export async function getAllLockersApi(): Promise<Locker[]> {
   const data = await fetchApi(mainApiUrl, "/lockers", { withAuth: true });
   // Sesuaikan jika response ada data wrapper
   return data.data || data;
+}
+
+export async function createAttendanceByFingerprintApi(fingerprintTemplate: string): Promise<any> {
+ const data = await fetchApi(mainApiUrl, "/attendances/fingerprint", {
+   method: "POST",
+   body: { fingerprint_template: fingerprintTemplate },
+   withAuth: true,
+ });
+ return data;
 }
 
 export interface FetchApiOptions {

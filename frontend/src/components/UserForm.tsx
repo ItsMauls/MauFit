@@ -6,6 +6,9 @@ export default function UserForm() {
   // Step 1: User
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [fingerprintTemplate, setFingerprintTemplate] = useState<string | null>(null);
+  const [scanStatus, setScanStatus] = useState<string>("Not Scanned");
+  const [isScanning, setIsScanning] = useState(false);
   // Step 2: Profile
   const [address, setAddress] = useState("");
   const [phone, setPhone] = useState("");
@@ -22,14 +25,52 @@ export default function UserForm() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleScanFingerprint = () => {
+    setIsScanning(true);
+    setScanStatus("Connecting to agent...");
+    const ws = new WebSocket('ws://localhost:8088');
+
+    ws.onopen = () => {
+      setScanStatus("Connected. Please scan.");
+      ws.send(JSON.stringify({ command: 'start_scan' }));
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      if (data.type === 'fingerprint_scanned') {
+        setFingerprintTemplate(data.template);
+        setScanStatus("Scan Successful!");
+        setIsScanning(false);
+        ws.close();
+      }
+    };
+
+    ws.onerror = () => {
+      setScanStatus("Agent connection failed.");
+      setIsScanning(false);
+    };
+
+    ws.onclose = () => {
+      if (!fingerprintTemplate) {
+        setScanStatus("Scan cancelled or failed.");
+      }
+      setIsScanning(false);
+    };
+  };
+
   // Step 1: Register user
   const handleUserSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!fingerprintTemplate) {
+      setError("Please scan fingerprint before registering.");
+      return;
+    }
     setLoading(true);
     setMessage(null);
     setError(null);
     try {
-      const res = await createUserApi({ name, email });
+      // Pass the fingerprint template to the API
+      const res = await createUserApi({ name, email, fingerprint_id: fingerprintTemplate });
       setMessage("User berhasil didaftarkan! Lanjutkan melengkapi profil.");
       setCreatedUserId(res.data.id || res.data.user?.id); // backend response
       setStep("profile");
@@ -58,7 +99,7 @@ export default function UserForm() {
       
       setMessage("Profil user berhasil dilengkapi!");
       setStep("user");
-      setName(""); setEmail(""); setAddress(""); setPhone(""); setBio(""); setPhotoProfileUrl("");
+      setName(""); setEmail(""); setAddress(""); setPhone(""); setBio(""); setPhotoProfileUrl(""); setFingerprintTemplate(null); setScanStatus("Not Scanned");
       setPhotoPreview(null);
       setCreatedUserId(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -122,6 +163,20 @@ export default function UserForm() {
               required
             />
           </div>
+           <div>
+             <label className="block text-sm font-medium text-green-200 mb-1.5">Sidik Jari</label>
+             <div className="flex items-center space-x-4">
+               <button
+                 type="button"
+                 onClick={handleScanFingerprint}
+                 disabled={isScanning}
+                 className="flex-shrink-0 bg-blue-500 text-white font-bold py-2.5 px-4 rounded-lg hover:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black focus:ring-blue-400 transition-colors duration-300"
+               >
+                 {isScanning ? "Scanning..." : "Pindai Sidik Jari"}
+               </button>
+               <p className={`text-sm ${scanStatus === 'Scan Successful!' ? 'text-green-400' : 'text-yellow-400'}`}>{scanStatus}</p>
+             </div>
+           </div>
           {message && <div className="text-green-400 text-sm text-center p-2 rounded-md bg-black/20">{message}</div>}
           {error && <div className="text-red-400 text-sm text-center p-2 rounded-md bg-black/20">{error}</div>}
           <button

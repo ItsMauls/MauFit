@@ -108,3 +108,26 @@ func (h *AttendanceHandler) GetAllAttendances(c *gin.Context) {
 	response := util.APIResponse("Attendances with users found", http.StatusOK, results)
 	c.JSON(http.StatusOK, response)
 }
+
+type CreateAttendanceByFingerprintInput struct {
+	FingerprintTemplate string `json:"fingerprint_template" binding:"required"`
+}
+
+func (h *AttendanceHandler) CreateAttendanceByFingerprint(c *gin.Context) {
+	var input CreateAttendanceByFingerprintInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response := util.APIResponse("Input not valid", http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	attendance, err := h.attendanceUsecase.CreateAttendanceByFingerprint(input.FingerprintTemplate)
+	if err != nil {
+		response := util.APIResponse(err.Error(), http.StatusNotFound, nil)
+		c.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	response := util.APIResponse("Attendance created by fingerprint", http.StatusCreated, attendance)
+	c.JSON(http.StatusCreated, response)
+}

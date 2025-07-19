@@ -152,3 +152,26 @@ func (h *UserHandler) UpdateUserProfile(c *gin.Context) {
 	response := util.APIResponse("User profile updated", http.StatusOK, profile)
 	c.JSON(http.StatusOK, response)
 }
+
+type VerifyFingerprintInput struct {
+	FingerprintTemplate string `json:"fingerprint_template" binding:"required"`
+}
+
+func (h *UserHandler) VerifyFingerprint(c *gin.Context) {
+	var input VerifyFingerprintInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		response := util.APIResponse("Input not valid", http.StatusBadRequest, nil)
+		c.JSON(http.StatusBadRequest, response)
+		return
+	}
+
+	user, err := h.userUsecase.VerifyFingerprint(input.FingerprintTemplate)
+	if err != nil {
+		response := util.APIResponse("User not found", http.StatusNotFound, nil)
+		c.JSON(http.StatusNotFound, response)
+		return
+	}
+
+	response := util.APIResponse("User verified", http.StatusOK, user)
+	c.JSON(http.StatusOK, response)
+}

@@ -68,6 +68,15 @@ func (r *userRepository) UpdateUserProfile(profile *domain.UserProfile) (*domain
 	return &existing, nil
 }
 
+func (r *userRepository) FindByFingerprintID(fingerprintID string) (*domain.User, error) {
+	var user domain.User
+	err := r.db.Preload("UserProfile").Where("fingerprint_id = ?", fingerprintID).First(&user).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}
+
 func NewUserRepository(db *gorm.DB) *userRepository {
 	return &userRepository{db: db}
 }

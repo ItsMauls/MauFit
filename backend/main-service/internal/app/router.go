@@ -17,6 +17,7 @@ func SetupRouter(router *gin.Engine, attendanceHandler *handler.AttendanceHandle
 			attendanceRoutes.POST("", attendanceHandler.CreateAttendance)
 			attendanceRoutes.GET("/:id", attendanceHandler.GetAttendanceByID)
 			attendanceRoutes.GET("", attendanceHandler.GetAllAttendances)
+			attendanceRoutes.POST("/fingerprint", attendanceHandler.CreateAttendanceByFingerprint)
 		}
 		lockerRoutes := apiV1.Group("/lockers")
 		{
