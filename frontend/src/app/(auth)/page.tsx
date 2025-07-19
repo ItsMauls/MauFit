@@ -4,6 +4,7 @@ import useAuthGuard from "@/hooks/useAuthGuard";
 import GlassCard from "@/components/GlassCard";
 import Modal from "@/components/Modal";
 import UserForm from "@/components/UserForm";
+import LockerGrid from "@/components/LockerGrid";
 
 const sidebarItems = [
   { label: "Dashboard", icon: "🏠" },
@@ -82,7 +83,7 @@ export default function Home() {
               <div> <span className="text-lg font-bold">Kelola Absensi (Coming Soon)</span> </div>
             )}
             {activeTab === "locker" && (
-              <div> <span className="text-lg font-bold">Kelola Locker (Coming Soon)</span> </div>
+              <LockerGrid />
             )}
           </div>
         </div>

@@ -14,10 +14,12 @@ func SeedData(db *gorm.DB) {
 	var lockerCount int64
 	db.Model(&domain.Locker{}).Count(&lockerCount)
 	if lockerCount == 0 {
-		lockers := []domain.Locker{
-			{LockerNumber: 1, IsUsed: false},
-			{LockerNumber: 2, IsUsed: false},
-			{LockerNumber: 3, IsUsed: false},
+		lockers := make([]domain.Locker, 100)
+		for i := 0; i < 100; i++ {
+			lockers[i] = domain.Locker{
+				LockerNumber: uint(i + 1),
+				IsUsed:       i%3 == 0, // Mix: setiap kelipatan 3 terisi, lainnya available
+			}
 		}
 		for _, locker := range lockers {
 			db.FirstOrCreate(&locker, domain.Locker{LockerNumber: locker.LockerNumber})
